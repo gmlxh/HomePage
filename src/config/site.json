@@ -1,0 +1,47 @@
+[
+  {
+    "name": "Komari 探针",
+    "url": "https://youngyannick.cn/",
+    "icon": "fas fa-server"
+  },
+  {
+    "name": "Komari 工具",
+    "url": "https://yancy.dpdns.org/",
+    "icon": "fas fa-search"
+  },
+  {
+    "name": "订阅转换",
+    "url": "https://zynt.top/",
+    "icon": "fas fa-sync-alt"
+  },
+  {
+    "name": "节点重命名",
+    "url": "/rname",
+    "icon": "fas fa-file-signature"
+  },{
+    "name": "IPLark",
+    "url": "https://iplark.com/",
+    "icon": "fas fa-globe"
+  },{
+    "name": "PingIP",
+    "url": "https://pingip.cn/",
+    "icon": "fas fa-globe"
+  }, {
+    "name": "IP.SB",
+    "url": "https://ip.sb/",
+    "icon": "fas fa-globe"
+  },
+  {
+    "name": "Fast 测网速",
+    "url": "https://fast.com/",
+    "icon": "fas fa-tachometer-alt"
+  },{
+    "name": "Speedtest",
+    "url": "https://speedtest.net/",
+    "icon": "fas fa-tachometer-alt"
+  },{
+    "name": "CloudFlare Speed Test",
+    "url": "https://speed.cloudflare.com/",
+    "icon": "fas fa-cloud"
+  }
+]

@@ -1,0 +1,1347 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>节点批量重命名工具</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-gradient-start: #f9fafb;
+            --bg-gradient-end: #ffffff;
+            --card-bg: #ffffff;
+            --text-color: #374151;
+            --text-color-light: #6b7280;
+            --heading-color: #1f2937;
+            --primary-color: #60a5fa;
+            --primary-color-dark: #3b82f6;
+            --primary-color-light: #f0f9ff;
+            --secondary-color: #34d399;
+            --secondary-color-dark: #10b981;
+            --danger-color: #f87171;
+            --danger-color-dark: #ef4444;
+            --border-color: #e5e7eb;
+            --shadow-color: rgba(99, 102, 241, 0.07);
+            --font-main: 'Noto Sans SC', 'Inter', sans-serif;
+            --border-radius: 1rem;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        ::selection {
+            background-color: lightpink;
+            color: #ffffff;
+        }
+
+        body::-webkit-scrollbar {
+            width: 12px;
+        }
+
+        body::-webkit-scrollbar-track {
+            background: var(--bg-gradient-start);
+        }
+
+        body::-webkit-scrollbar-thumb {
+            background-color: #e5e7eb;
+            border-radius: 10px;
+            border: 3px solid var(--bg-gradient-start);
+        }
+
+        body::-webkit-scrollbar-thumb:hover {
+            background-color: #d1d5db;
+        }
+
+        body {
+            font-family: var(--font-main);
+            background-color: var(--bg-gradient-start);
+            background-image: linear-gradient(160deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%);
+            color: var(--text-color);
+            padding: 2rem;
+            line-height: 1.6;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1400px;
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        .main-header {
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+
+        .main-header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--heading-color);
+        }
+
+        .main-header p {
+            font-size: 1rem;
+            color: var(--text-color-light);
+            margin-top: 0.75rem;
+            font-weight: 500;
+        }
+
+        .main-header .protocol-badge {
+            display: inline-block;
+            background-color: var(--primary-color-light);
+            color: var(--primary-color);
+            padding: 0.15rem 0.6rem;
+            border-radius: 0.5rem;
+            font-size: 0.9rem;
+            margin: 0 0.2rem;
+            font-weight: 700;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: 2.5rem;
+            box-shadow: 0 10px 15px -3px var(--shadow-color), 0 4px 6px -4px var(--shadow-color);
+            border: 1px solid #f3f4f6;
+            transition: box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            box-shadow: 0 20px 25px -5px var(--shadow-color), 0 8px 10px -6px var(--shadow-color);
+        }
+
+        .card h2 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            color: var(--heading-color);
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .card h2 svg {
+            width: 24px;
+            height: 24px;
+            color: var(--primary-color);
+        }
+
+        .config-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1.5rem 2rem;
+            align-items: flex-end;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            font-weight: 500;
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+            color: var(--text-color-light);
+        }
+
+        .form-group input[type="text"],
+        .form-group input[type="number"],
+        .form-group select {
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            font-family: var(--font-main);
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+
+        .form-group input[type="text"]:focus,
+        .form-group input[type="number"]:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px var(--primary-color-light);
+        }
+
+        .form-group select {
+            -webkit-appearance: none;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+            background-position: right 0.5rem center;
+            background-repeat: no-repeat;
+            background-size: 1.5em 1.5em;
+            padding-right: 2.5rem;
+        }
+
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+
+        .main-actions {
+            margin-top: 2rem;
+            padding-top: 2rem;
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .btn {
+            padding: 0.75rem 1.75rem;
+            font-size: 1rem;
+            font-weight: 500;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            border: 1px solid transparent;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        .btn:hover {
+            filter: brightness(1.1);
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-color-dark);
+        }
+
+        .btn-secondary {
+            background-color: var(--secondary-color);
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background-color: var(--secondary-color-dark);
+        }
+
+        .btn-danger {
+            background-color: var(--danger-color);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background-color: var(--danger-color-dark);
+        }
+
+        .io-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 2.5rem;
+        }
+
+        textarea {
+            width: 100%;
+            height: 380px;
+            padding: 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 0.75rem;
+            font-family: var(--font-main);
+            resize: none;
+            line-height: 1.6;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px var(--primary-color-light);
+        }
+
+        textarea::placeholder {
+            color: #9CA3AF;
+        }
+
+        textarea::-webkit-scrollbar,
+        .tab-pane::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        textarea::-webkit-scrollbar-track,
+        .tab-pane::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 10px;
+        }
+
+        textarea::-webkit-scrollbar-thumb,
+        .tab-pane::-webkit-scrollbar-thumb {
+            background-color: #d1d5db;
+            border-radius: 10px;
+        }
+
+        textarea::-webkit-scrollbar-thumb:hover,
+        .tab-pane::-webkit-scrollbar-thumb:hover {
+            background-color: #9ca3af;
+        }
+
+        #notification {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%) translateY(200%);
+            background-color: var(--heading-color);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+            font-weight: 500;
+            font-size: 0.95rem;
+            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 1000;
+            opacity: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        #notification svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        #notification.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 2rem;
+            color: #6B7280;
+        }
+
+        footer span {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        footer span:hover {
+            cursor: pointer;
+        }
+
+        #namePreviewBox {
+            grid-column: 1 / -1;
+            margin-top: 1rem;
+        }
+
+        #namePreview {
+            padding: 0.75rem 1rem;
+            border: 1px dashed var(--border-color);
+            border-radius: 0.5rem;
+            color: var(--text-color);
+            background-color: #f8fafc;
+            font-weight: 500;
+            min-height: 49px;
+            display: flex;
+            align-items: center;
+            word-break: break-all;
+        }
+
+        .tabs-container {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            min-height: 450px;
+        }
+
+        .tabs-nav {
+            display: flex;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .tab-item {
+            padding: 0.75rem 1.25rem;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            color: var(--text-color-light);
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .tab-item.active {
+            color: var(--primary-color);
+            border-bottom-color: var(--primary-color);
+        }
+
+        .tab-content {
+            flex-grow: 1;
+            position: relative;
+        }
+
+        .tab-pane {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow-y: auto;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.2s;
+            background-color: #ffffff;
+            border: 1px solid var(--border-color);
+            border-top: none;
+            border-radius: 0 0 0.75rem 0.75rem;
+        }
+
+        #tab-output {
+            overflow: hidden;
+            padding: 0;
+        }
+
+        #tab-output textarea {
+            height: 100%;
+            width: 100%;
+            border: none;
+            border-radius: 0;
+            box-shadow: none;
+            resize: none;
+        }
+
+        .tab-pane.active {
+            opacity: 1;
+            visibility: visible;
+            z-index: 1;
+        }
+
+        #tab-output textarea {
+            height: 100%;
+            border: none;
+            border-radius: 0;
+            resize: none;
+            transition: none;
+            box-shadow: none;
+        }
+
+        #tab-output textarea:focus {
+            box-shadow: none;
+        }
+
+        .comparison-item {
+            display: grid;
+            grid-template-columns: 100px 1fr auto 1fr;
+            align-items: center;
+            padding: 0.75rem;
+            border-bottom: 1px solid #f3f4f6;
+            gap: 0.75rem 1rem;
+            font-size: 0.9rem;
+        }
+
+        .comparison-item:last-child {
+            border-bottom: none;
+        }
+
+        .comparison-name {
+            word-break: break-all;
+            color: var(--text-color-light);
+        }
+
+        .comparison-name.renamed {
+            color: var(--text-color);
+            font-weight: 500;
+        }
+
+        .comparison-arrow {
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .comparison-arrow svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        .protocol-tag {
+            display: inline-block;
+            padding: 0.2rem 0.5rem;
+            border-radius: 0.375rem;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-align: center;
+            width: 100%;
+            max-width: 100px;
+        }
+
+        .protocol-tag--vmess {
+            color: #2563eb;
+            background-color: #dbeafe;
+            border: 1px solid #bfdbfe;
+        }
+
+        .protocol-tag--vless {
+            color: #7c3aed;
+            background-color: #ede9fe;
+            border: 1px solid #ddd6fe;
+        }
+
+        .protocol-tag--ss {
+            color: #16a34a;
+            background-color: #dcfce7;
+            border: 1px solid #bbf7d0;
+        }
+
+        .protocol-tag--trojan {
+            color: #dc2626;
+            background-color: #fee2e2;
+            border: 1px solid #fecaca;
+        }
+
+        .protocol-tag--hysteria2 {
+            color: #f97316;
+            background-color: #ffedd5;
+            border: 1px solid #fed7aa;
+        }
+
+        .protocol-tag--tuic {
+            color: #0d9488;
+            background-color: #ccfbf1;
+            border: 1px solid #99f6e4;
+        }
+
+        .protocol-tag--anytls,
+        .protocol-tag--socks {
+            color: #57534e;
+            background-color: #e7e5e4;
+            border: 1px solid #d6d3d1;
+        }
+
+        .protocol-tag--未知 {
+            color: #4b5563;
+            background-color: #f3f4f6;
+            border: 1px solid #e5e7eb;
+        }
+
+        #analysisResult {
+            padding: 1rem;
+        }
+
+        #analysisResult h4 {
+            font-size: 1rem;
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+            margin-top: 0.75rem;
+        }
+
+        #analysisResult h4:first-child {
+            margin-top: 0;
+        }
+
+        #analysisResult ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        #analysisResult li {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.4rem 0.1rem;
+            border-bottom: 1px solid #f3f4f6;
+            font-size: 0.9rem;
+        }
+
+        #analysisResult li .name {
+            color: var(--text-color);
+        }
+
+        #analysisResult li .count {
+            font-weight: 700;
+            color: #0284c7;
+        }
+
+        .format-tags {
+            font-size: 0.85rem;
+            color: var(--text-color-light);
+            margin-top: 0.5rem;
+        }
+
+        .format-tags code {
+            background-color: #f3f4f6;
+            color: var(--primary-color-dark);
+            padding: 0.1rem 0.3rem;
+            border-radius: 4px;
+            font-weight: 700;
+        }
+
+        @media (min-width: 992px) {
+            .io-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .io-grid>div {
+                display: flex;
+                flex-direction: column;
+            }
+
+            .tabs-container {
+                flex-grow: 1;
+            }
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 1rem;
+            }
+
+            .container {
+                gap: 1.5rem;
+            }
+
+            .card {
+                padding: 1.5rem;
+            }
+
+            .main-header h1 {
+                font-size: 2rem;
+            }
+
+            .config-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header class="main-header">
+            <h1>节点批量重命名</h1>
+            <p>
+                支持协议:
+                <span class="protocol-badge">SS</span>
+                <span class="protocol-badge">VLESS</span>
+                <span class="protocol-badge">VMESS</span>
+                <span class="protocol-badge">Trojan</span>
+                <span class="protocol-badge">Hysteria2</span>
+                <span class="protocol-badge">Tuic</span>
+                <span class="protocol-badge">AnyTLS</span>
+                <span class="protocol-badge">Socks</span>
+            </p>
+            <p>基于 JavaScript 在本地浏览器中运行，不涉及任何服务器端上传或存储操作，无需担心节点泄露风险。</p>
+        </header>
+        <div class="card">
+            <h2>
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd"
+                        d="M7.84 1.804A1 1 0 0 1 8.82 1h2.36a1 1 0 0 1 .98.804l.331 1.652a6.993 6.993 0 0 1 1.894 1.21l1.488-.744a1 1 0 0 1 1.293.303l1.18 2.043a1 1 0 0 1-.303 1.293l-1.488.744a7.04 7.04 0 0 1 0 2.42l1.488.744a1 1 0 0 1 .303 1.293l-1.18 2.043a1 1 0 0 1-1.293.303l-1.488-.744a6.993 6.993 0 0 1-1.894 1.21l-.331 1.652A1 1 0 0 1 11.18 19H8.82a1 1 0 0 1-.98-.804l-.331-1.652a6.993 6.993 0 0 1-1.894-1.21l-1.488.744a1 1 0 0 1-1.293-.303L1.68 12.93a1 1 0 0 1 .303-1.293l1.488-.744a7.04 7.04 0 0 1 0-2.42L1.983 7.73a1 1 0 0 1-.303-1.293L2.86 4.394a1 1 0 0 1 1.293-.303l1.488.744A6.993 6.993 0 0 1 7.53 3.622l.33-1.652ZM10 13a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"
+                        clip-rule="evenodd" />
+                </svg>
+                命名规则配置
+            </h2>
+            <div class="config-grid">
+                <div class="form-group">
+                    <label for="baseName">基础名称 {baseName}</label>
+                    <input type="text" id="baseName" value="YoungYannick" placeholder="例如：我的日本节点">
+                </div>
+                <div class="form-group">
+                    <label for="suffixStart">序号起始值 {suffix}</label>
+                    <input type="number" id="suffixStart" value="1" min="0">
+                </div>
+                <div class="form-group">
+                    <label for="flagSource">旗帜识别依据</label>
+                    <select id="flagSource">
+                        <option value="originalName" selected>原始名称</option>
+                        <option value="baseName">基础名称</option>
+                    </select>
+                </div>
+                <div class="form-group full-width">
+                    <label for="nameFormat">命名格式 (可手动输入)</label>
+                    <input type="text" id="nameFormat" value="{flag} {baseName} - {protocol} {suffix}">
+                    <div class="format-tags">
+                        可用参数: <code>{flag}</code> <code>{baseName}</code> <code>{protocol}</code> <code>{suffix}</code>
+                        <code>{originalName}</code>
+                    </div>
+                </div>
+                <div class="form-group full-width">
+                    <label for="presetFormats">选择预设格式</label>
+                    <select id="presetFormats">
+                        <option value="{flag} {baseName} - {protocol} {suffix}">[常用] 旗帜 基础名 - 协议 序号</option>
+                        <option value="{flag} {baseName} - {suffix}">[常用] 旗帜 基础名 - 序号</option>
+                        <option value="{originalName}">[特殊] 仅原始名称</option>
+                        <option value="{flag} {originalName}">[特殊] 旗帜 原始名称</option>
+                        <option value="{flag} {originalName} - {suffix}">[特殊] 旗帜 原始名称 - 序号</option>
+                    </select>
+                </div>
+                <div class="form-group full-width" id="namePreviewBox">
+                    <label for="namePreview">命名格式预览</label>
+                    <div id="namePreview"></div>
+                </div>
+            </div>
+        </div>
+        <div class="card">
+            <div class="io-grid">
+                <div>
+                    <h2>
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                            <path
+                                d="M5.5 17a1.5 1.5 0 0 1-1.5-1.5V4.5A1.5 1.5 0 0 1 5.5 3h4.75a.75.75 0 0 1 0 1.5H5.5a.5.5 0 0 0-.5.5v11a.5.5 0 0 0 .5.5h11a.5.5 0 0 0 .5-.5V11a.75.75 0 0 1 1.5 0v4.5a1.5 1.5 0 0 1-1.5-1.5h-11Z" />
+                            <path
+                                d="M11.5 3.75a.75.75 0 0 1 .75-.75h2.5a.75.75 0 0 1 .75.75v2.5a.75.75 0 0 1-1.5 0V5.56l-5.72 5.72a.75.75 0 0 1-1.06-1.06l5.72-5.72H12.25a.75.75 0 0 1-.75-.75Z" />
+                        </svg>
+                        输入区域
+                    </h2>
+                    <textarea id="inputNodes" placeholder="在此处粘贴您的代理节点，每行一个..."></textarea>
+                </div>
+                <div class="tabs-container">
+                    <h2>
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd"
+                                d="M10 18a8 8 0 1 0 0-16 8 8 0 0 0 0 16Zm3.857-9.809a.75.75 0 0 0-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 1 0-1.06 1.061l2.5 2.5a.75.75 0 0 0 1.137-.089l4-5.5Z"
+                                clip-rule="evenodd" />
+                        </svg>
+                        结果区域
+                    </h2>
+                    <div class="tabs-nav">
+                        <div class="tab-item active" data-tab="comparison">重命名预览</div>
+                        <div class="tab-item" data-tab="output">输出结果</div>
+                        <div class="tab-item" data-tab="analysis">节点分析</div>
+                    </div>
+                    <div class="tab-content">
+                        <div class="tab-pane" id="tab-output">
+                            <textarea id="outputNodes" readonly placeholder=""></textarea>
+                        </div>
+                        <div class="tab-pane active" id="tab-comparison">
+                            <div id="comparisonList"></div>
+                        </div>
+                        <div class="tab-pane" id="tab-analysis">
+                            <div id="analysisResult"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="main-actions">
+                <button id="processBtn" class="btn btn-primary">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd"
+                            d="M15.312 11.342a1.25 1.25 0 0 1 0 1.768l-2.122 2.121-1.06-1.061 2.121-2.121a1.25 1.25 0 0 1 1.061 0Zm-2.828-2.828-2.122 2.121-1.06-1.061 2.121-2.121a1.25 1.25 0 1 1 1.768 1.768Zm-4.242 5.656-1.061-1.06 2.122-2.122a1.25 1.25 0 0 0-1.768-1.768L5.342 15.312a1.25 1.25 0 0 0 0 1.768l2.12 2.121a1.25 1.25 0 0 0 1.768 0l2.121-2.121-1.06-1.06-2.122 2.121Z"
+                            clip-rule="evenodd" />
+                        <path
+                            d="M10.707 3.293a1 1 0 0 0-1.414 0L3.293 9.293a1 1 0 1 0 1.414 1.414L10 5.414l5.293 5.293a1 1 0 0 0 1.414-1.414l-6-6Z" />
+                    </svg>
+                    开始重命名
+                </button>
+                <button id="copyBtn" class="btn btn-secondary">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                        <path
+                            d="M7 3.5A1.5 1.5 0 0 1 8.5 2h3.879a1.5 1.5 0 0 1 1.06.44l3.122 3.121A1.5 1.5 0 0 1 17 6.621V16.5A1.5 1.5 0 0 1 15.5 18h-8A1.5 1.5 0 0 1 6 16.5v-13A1.5 1.5 0 0 1 7 3.5ZM8.5 3a.5.5 0 0 0-.5.5v13a.5.5 0 0 0 .5.5h8a.5.5 0 0 0 .5-.5V6.621a.5.5 0 0 0-.146-.353l-3.121-3.122A.5.5 0 0 0 12.379 3H8.5Z" />
+                        <path
+                            d="M4.5 5A1.5 1.5 0 0 0 3 6.5v10A1.5 1.5 0 0 0 4.5 18h8a1.5 1.5 0 0 0 1.5-1.5v-2a.75.75 0 0 1-1.5 0v2a.5.5 0 0 1-.5.5h-8a.5.5 0 0 1-.5-.5v-10a.5.5 0 0 1 .5-.5h2a.75.75 0 0 1 0 1.5h-2Z" />
+                    </svg>
+                    复制结果
+                </button>
+                <button id="clearBtn" class="btn btn-danger">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd"
+                            d="M8.75 1A2.75 2.75 0 0 0 6 3.75V4.5h8V3.75A2.75 2.75 0 0 0 11.25 1h-2.5ZM10 6a.75.75 0 0 1 .75.75v7.5a.75.75 0 0 1-1.5 0v-7.5A.75.75 0 0 1 10 6ZM4.5 6a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1V7a1 1 0 0 0-1-1h-11Z"
+                            clip-rule="evenodd" />
+                    </svg>
+                    一键清空
+                </button>
+            </div>
+        </div>
+        <footer>
+            <p>© 2025 - Powered By <span>Yannick Young</span></p>
+        </footer>
+    </div>
+    <div id="notification">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd"
+                d="M10 18a8 8 0 1 0 0-16 8 8 0 0 0 0 16Zm3.857-9.809a.75.75 0 0 0-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 1 0-1.06 1.061l2.5 2.5a.75.75 0 0 0 1.137-.089l4-5.5Z"
+                clip-rule="evenodd" />
+        </svg>
+        <span></span>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const baseNameInput = document.getElementById('baseName');
+            const suffixStartInput = document.getElementById('suffixStart');
+            const flagSourceSelect = document.getElementById('flagSource');
+            const nameFormatInput = document.getElementById('nameFormat');
+            const presetFormatsSelect = document.getElementById('presetFormats');
+            const inputNodesTextarea = document.getElementById('inputNodes');
+            const outputNodesTextarea = document.getElementById('outputNodes');
+            const processBtn = document.getElementById('processBtn');
+            const copyBtn = document.getElementById('copyBtn');
+            const clearBtn = document.getElementById('clearBtn');
+            const notification = document.getElementById('notification');
+            const notificationText = notification.querySelector('span');
+            const namePreview = document.getElementById('namePreview');
+            const comparisonList = document.getElementById('comparisonList');
+            const analysisResult = document.getElementById('analysisResult');
+            const tabs = document.querySelectorAll('.tab-item');
+            const tabPanes = document.querySelectorAll('.tab-pane');
+
+                        const COUNTRY = {
+                "AF": {"name": "阿富汗", "en_name": "Afghanistan", "flag": "🇦🇫"},
+                "AX": {"name": "奥兰群岛", "en_name": "Åland Islands", "flag": "🇦🇽"},
+                "AL": {"name": "阿尔巴尼亚", "en_name": "Albania", "flag": "🇦🇱"},
+                "DZ": {"name": "阿尔及利亚", "en_name": "Algeria", "flag": "🇩🇿"},
+                "AS": {"name": "美属萨摩亚", "en_name": "American Samoa", "flag": "🇦🇸"},
+                "AD": {"name": "安道尔", "en_name": "Andorra", "flag": "🇦🇩"},
+                "AO": {"name": "安哥拉", "en_name": "Angola", "flag": "🇦🇴"},
+                "AI": {"name": "安圭拉", "en_name": "Anguilla", "flag": "🇦🇮"},
+                "AQ": {"name": "南极洲", "en_name": "Antarctica", "flag": "🇦🇶"},
+                "AG": {"name": "安提瓜和巴布达", "en_name": "Antigua and Barbuda", "flag": "🇦🇬"},
+                "AR": {"name": "阿根廷", "en_name": "Argentina", "flag": "🇦🇷"},
+                "AM": {"name": "亚美尼亚", "en_name": "Armenia", "flag": "🇦🇲"},
+                "AW": {"name": "阿鲁巴", "en_name": "Aruba", "flag": "🇦🇼"},
+                "AU": {"name": "澳大利亚", "en_name": "Australia", "flag": "🇦🇺"},
+                "AT": {"name": "奥地利", "en_name": "Austria", "flag": "🇦🇹"},
+                "AZ": {"name": "阿塞拜疆", "en_name": "Azerbaijan", "flag": "🇦🇿"},
+                "BS": {"name": "巴哈马", "en_name": "Bahamas", "flag": "🇧🇸"},
+                "BH": {"name": "巴林", "en_name": "Bahrain", "flag": "🇧🇭"},
+                "BD": {"name": "孟加拉国", "en_name": "Bangladesh", "flag": "🇧🇩"},
+                "BB": {"name": "巴巴多斯", "en_name": "Barbados", "flag": "🇧🇧"},
+                "BY": {"name": "白俄罗斯", "en_name": "Belarus", "flag": "🇧🇾"},
+                "BE": {"name": "比利时", "en_name": "Belgium", "flag": "🇧🇪"},
+                "BZ": {"name": "伯利兹", "en_name": "Belize", "flag": "🇧🇿"},
+                "BJ": {"name": "贝宁", "en_name": "Benin", "flag": "🇧🇯"},
+                "BM": {"name": "百慕大", "en_name": "Bermuda", "flag": "🇧🇲"},
+                "BT": {"name": "不丹", "en_name": "Bhutan", "flag": "🇧🇹"},
+                "BO": {"name": "玻利维亚", "en_name": "Bolivia", "flag": "🇧🇴"},
+                "BQ": {"name": "博奈尔、圣尤斯特歇斯和萨巴", "en_name": "Bonaire, Sint Eustatius and Saba", "flag": "🇧🇶"},
+                "BA": {"name": "波斯尼亚和黑塞哥维那", "en_name": "Bosnia and Herzegovina", "flag": "🇧🇦"},
+                "BW": {"name": "博茨瓦纳", "en_name": "Botswana", "flag": "🇧🇼"},
+                "BV": {"name": "布维岛", "en_name": "Bouvet Island", "flag": "🇧🇻"},
+                "BR": {"name": "巴西", "en_name": "Brazil", "flag": "🇧🇷"},
+                "IO": {"name": "英属印度洋领地", "en_name": "British Indian Ocean Territory", "flag": "🇮🇴"},
+                "BN": {"name": "文莱", "en_name": "Brunei Darussalam", "flag": "🇧🇳"},
+                "BG": {"name": "保加利亚", "en_name": "Bulgaria", "flag": "🇧🇬"},
+                "BF": {"name": "布基纳法索", "en_name": "Burkina Faso", "flag": "🇧🇫"},
+                "BI": {"name": "布隆迪", "en_name": "Burundi", "flag": "🇧🇮"},
+                "CV": {"name": "佛得角", "en_name": "Cabo Verde", "flag": "🇨🇻"},
+                "KH": {"name": "柬埔寨", "en_name": "Cambodia", "flag": "🇰🇭"},
+                "CM": {"name": "喀麦隆", "en_name": "Cameroon", "flag": "🇨🇲"},
+                "CA": {"name": "加拿大", "en_name": "Canada", "flag": "🇨🇦"},
+                "KY": {"name": "开曼群岛", "en_name": "Cayman Islands", "flag": "🇰🇾"},
+                "CF": {"name": "中非共和国", "en_name": "Central African Republic", "flag": "🇨🇫"},
+                "TD": {"name": "乍得", "en_name": "Chad", "flag": "🇹🇩"},
+                "CL": {"name": "智利", "en_name": "Chile", "flag": "🇨🇱"},
+                "CN": {"name": "中国", "en_name": "China", "flag": "🇨🇳"},
+				"TW": {"name": "台湾", "en_name": "TaiWan", "flag": "🇹🇼"},
+                "CX": {"name": "圣诞岛", "en_name": "Christmas Island", "flag": "🇨🇽"},
+                "CC": {"name": "科科斯（基林）群岛", "en_name": "Cocos (Keeling) Islands", "flag": "🇨🇨"},
+                "CO": {"name": "哥伦比亚", "en_name": "Colombia", "flag": "🇨🇴"},
+                "KM": {"name": "科摩罗", "en_name": "Comoros", "flag": "🇰🇲"},
+                "CG": {"name": "刚果（布）", "en_name": "Congo", "flag": "🇨🇬"},
+                "CD": {"name": "刚果（金）", "en_name": "Congo (Democratic Republic of the)", "flag": "🇨🇩"},
+                "CK": {"name": "库克群岛", "en_name": "Cook Islands", "flag": "🇨🇰"},
+                "CR": {"name": "哥斯达黎加", "en_name": "Costa Rica", "flag": "🇨🇷"},
+                "CI": {"name": "科特迪瓦", "en_name": "Côte d'Ivoire", "flag": "🇨🇮"},
+                "HR": {"name": "克罗地亚", "en_name": "Croatia", "flag": "🇭🇷"},
+                "CU": {"name": "古巴", "en_name": "Cuba", "flag": "🇨🇺"},
+                "CW": {"name": "库拉索", "en_name": "Curaçao", "flag": "🇨🇼"},
+                "CY": {"name": "塞浦路斯", "en_name": "Cyprus", "flag": "🇨🇾"},
+                "CZ": {"name": "捷克", "en_name": "Czechia", "flag": "🇨🇿"},
+                "DK": {"name": "丹麦", "en_name": "Denmark", "flag": "🇩🇰"},
+                "DJ": {"name": "吉布提", "en_name": "Djibouti", "flag": "🇩🇯"},
+                "DM": {"name": "多米尼克", "en_name": "Dominica", "flag": "🇩🇲"},
+                "DO": {"name": "多米尼加共和国", "en_name": "Dominican Republic", "flag": "🇩🇴"},
+                "EC": {"name": "厄瓜多尔", "en_name": "Ecuador", "flag": "🇪🇨"},
+                "EG": {"name": "埃及", "en_name": "Egypt", "flag": "🇪🇬"},
+                "SV": {"name": "萨尔瓦多", "en_name": "El Salvador", "flag": "🇸🇻"},
+                "GQ": {"name": "赤道几内亚", "en_name": "Equatorial Guinea", "flag": "🇬🇶"},
+                "ER": {"name": "厄立特里亚", "en_name": "Eritrea", "flag": "🇪🇷"},
+                "EE": {"name": "爱沙尼亚", "en_name": "Estonia", "flag": "🇪🇪"},
+                "SZ": {"name": "斯威士兰", "en_name": "Eswatini", "flag": "🇸🇿"},
+                "ET": {"name": "埃塞俄比亚", "en_name": "Ethiopia", "flag": "🇪🇹"},
+                "FK": {"name": "福克兰群岛（马尔维纳斯）", "en_name": "Falkland Islands (Malvinas)", "flag": "🇫🇰"},
+                "FO": {"name": "法罗群岛", "en_name": "Faroe Islands", "flag": "🇫🇴"},
+                "FJ": {"name": "斐济", "en_name": "Fiji", "flag": "🇫🇯"},
+                "FI": {"name": "芬兰", "en_name": "Finland", "flag": "🇫🇮"},
+                "FR": {"name": "法国", "en_name": "France", "flag": "🇫🇷"},
+                "GF": {"name": "法属圭亚那", "en_name": "French Guiana", "flag": "🇬🇫"},
+                "PF": {"name": "法属波利尼西亚", "en_name": "French Polynesia", "flag": "🇵🇫"},
+                "TF": {"name": "法属南部领地", "en_name": "French Southern Territories", "flag": "🇹🇫"},
+                "GA": {"name": "加蓬", "en_name": "Gabon", "flag": "🇬🇦"},
+                "GM": {"name": "冈比亚", "en_name": "Gambia", "flag": "🇬🇲"},
+                "GE": {"name": "格鲁吉亚", "en_name": "Georgia", "flag": "🇬🇪"},
+                "DE": {"name": "德国", "en_name": "Germany", "flag": "🇩🇪"},
+                "GH": {"name": "加纳", "en_name": "Ghana", "flag": "🇬🇭"},
+                "GI": {"name": "直布罗陀", "en_name": "Gibraltar", "flag": "🇬🇮"},
+                "GR": {"name": "希腊", "en_name": "Greece", "flag": "🇬🇷"},
+                "GL": {"name": "格陵兰", "en_name": "Greenland", "flag": "🇬🇱"},
+                "GD": {"name": "格林纳达", "en_name": "Grenada", "flag": "🇬🇩"},
+                "GP": {"name": "瓜德罗普", "en_name": "Guadeloupe", "flag": "🇬🇵"},
+                "GU": {"name": "关岛", "en_name": "Guam", "flag": "🇬🇺"},
+                "GT": {"name": "危地马拉", "en_name": "Guatemala", "flag": "🇬🇹"},
+                "GG": {"name": "根西", "en_name": "Guernsey", "flag": "🇬🇬"},
+                "GN": {"name": "几内亚", "en_name": "Guinea", "flag": "🇬🇳"},
+                "GW": {"name": "几内亚比绍", "en_name": "Guinea-Bissau", "flag": "🇬🇼"},
+                "GY": {"name": "圭亚那", "en_name": "Guyana", "flag": "🇬🇾"},
+                "HT": {"name": "海地", "en_name": "Haiti", "flag": "🇭🇹"},
+                "HM": {"name": "赫德岛和麦克唐纳群岛", "en_name": "Heard Island and McDonald Islands", "flag": "🇭🇲"},
+                "VA": {"name": "梵蒂冈", "en_name": "Holy See", "flag": "🇻🇦"},
+                "HN": {"name": "洪都拉斯", "en_name": "Honduras", "flag": "🇭🇳"},
+                "HK": {"name": "香港", "en_name": "Hong Kong", "flag": "🇭🇰"},
+                "HU": {"name": "匈牙利", "en_name": "Hungary", "flag": "🇭🇺"},
+                "IS": {"name": "冰岛", "en_name": "Iceland", "flag": "🇮🇸"},
+                "IN": {"name": "印度", "en_name": "India", "flag": "🇮🇳"},
+                "ID": {"name": "印度尼西亚", "en_name": "Indonesia", "flag": "🇮🇩"},
+                "IR": {"name": "伊朗", "en_name": "Iran", "flag": "🇮🇷"},
+                "IQ": {"name": "伊拉克", "en_name": "Iraq", "flag": "🇮🇶"},
+                "IE": {"name": "爱尔兰", "en_name": "Ireland", "flag": "🇮🇪"},
+                "IM": {"name": "马恩岛", "en_name": "Isle of Man", "flag": "🇮🇲"},
+                "IL": {"name": "以色列", "en_name": "Israel", "flag": "🇮🇱"},
+                "IT": {"name": "意大利", "en_name": "Italy", "flag": "🇮🇹"},
+                "JM": {"name": "牙买加", "en_name": "Jamaica", "flag": "🇯🇲"},
+                "JP": {"name": "日本", "en_name": "Japan", "flag": "🇯🇵"},
+                "JE": {"name": "泽西", "en_name": "Jersey", "flag": "🇯🇪"},
+                "JO": {"name": "约旦", "en_name": "Jordan", "flag": "🇯🇴"},
+                "KZ": {"name": "哈萨克斯坦", "en_name": "Kazakhstan", "flag": "🇰🇿"},
+                "KE": {"name": "肯尼亚", "en_name": "Kenya", "flag": "🇰🇪"},
+                "KI": {"name": "基里巴斯", "en_name": "Kiribati", "flag": "🇰🇮"},
+                "KP": {"name": "朝鲜", "en_name": "Korea (Democratic People's Republic of)", "flag": "🇰🇵"},
+                "KR": {"name": "韩国", "en_name": "Korea (Republic of)", "flag": "🇰🇷"},
+                "KW": {"name": "科威特", "en_name": "Kuwait", "flag": "🇰🇼"},
+                "KG": {"name": "吉尔吉斯斯坦", "en_name": "Kyrgyzstan", "flag": "🇰🇬"},
+                "LA": {"name": "老挝", "en_name": "Lao People's Democratic Republic", "flag": "🇱🇦"},
+                "LV": {"name": "拉脱维亚", "en_name": "Latvia", "flag": "🇱🇻"},
+                "LB": {"name": "黎巴嫩", "en_name": "Lebanon", "flag": "🇱🇧"},
+                "LS": {"name": "莱索托", "en_name": "Lesotho", "flag": "🇱🇸"},
+                "LR": {"name": "利比里亚", "en_name": "Liberia", "flag": "🇱🇷"},
+                "LY": {"name": "利比亚", "en_name": "Libya", "flag": "🇱🇾"},
+                "LI": {"name": "列支敦士登", "en_name": "Liechtenstein", "flag": "🇱🇮"},
+                "LT": {"name": "立陶宛", "en_name": "Lithuania", "flag": "🇱🇹"},
+                "LU": {"name": "卢森堡", "en_name": "Luxembourg", "flag": "🇱🇺"},
+                "MO": {"name": "中国澳门", "en_name": "Macao", "flag": "🇲🇴"},
+                "MG": {"name": "马达加斯加", "en_name": "Madagascar", "flag": "🇲🇬"},
+                "MW": {"name": "马拉维", "en_name": "Malawi", "flag": "🇲🇼"},
+                "MY": {"name": "马来西亚", "en_name": "Malaysia", "flag": "🇲🇾"},
+                "MV": {"name": "马尔代夫", "en_name": "Maldives", "flag": "🇲🇻"},
+                "ML": {"name": "马里", "en_name": "Mali", "flag": "🇲🇱"},
+                "MT": {"name": "马耳他", "en_name": "Malta", "flag": "🇲🇹"},
+                "MH": {"name": "马绍尔群岛", "en_name": "Marshall Islands", "flag": "🇲🇭"},
+                "MQ": {"name": "马提尼克", "en_name": "Martinique", "flag": "🇲🇶"},
+                "MR": {"name": "毛里塔尼亚", "en_name": "Mauritania", "flag": "🇲🇷"},
+                "MU": {"name": "毛里求斯", "en_name": "Mauritius", "flag": "🇲🇺"},
+                "YT": {"name": "马约特", "en_name": "Mayotte", "flag": "🇾🇹"},
+                "MX": {"name": "墨西哥", "en_name": "Mexico", "flag": "🇲🇽"},
+                "FM": {"name": "密克罗尼西亚", "en_name": "Micronesia (Federated States of)", "flag": "🇫🇲"},
+                "MD": {"name": "摩尔多瓦", "en_name": "Moldova (Republic of)", "flag": "🇲🇩"},
+                "MC": {"name": "摩纳哥", "en_name": "Monaco", "flag": "🇲🇨"},
+                "MN": {"name": "蒙古", "en_name": "Mongolia", "flag": "🇲🇳"},
+                "ME": {"name": "黑山", "en_name": "Montenegro", "flag": "🇲🇪"},
+                "MS": {"name": "蒙特塞拉特", "en_name": "Montserrat", "flag": "🇲🇸"},
+                "MA": {"name": "摩洛哥", "en_name": "Morocco", "flag": "🇲🇦"},
+                "MZ": {"name": "莫桑比克", "en_name": "Mozambique", "flag": "🇲🇿"},
+                "MM": {"name": "缅甸", "en_name": "Myanmar", "flag": "🇲🇲"},
+                "NA": {"name": "纳米比亚", "en_name": "Namibia", "flag": "🇳🇦"},
+                "NR": {"name": "瑙鲁", "en_name": "Nauru", "flag": "🇳🇷"},
+                "NP": {"name": "尼泊尔", "en_name": "Nepal", "flag": "🇳🇵"},
+                "NL": {"name": "荷兰", "en_name": "Netherlands", "flag": "🇳🇱"},
+                "NC": {"name": "新喀里多尼亚", "en_name": "New Caledonia", "flag": "🇳🇨"},
+                "NZ": {"name": "新西兰", "en_name": "New Zealand", "flag": "🇳🇿"},
+                "NI": {"name": "尼加拉瓜", "en_name": "Nicaragua", "flag": "🇳🇮"},
+                "NE": {"name": "尼日尔", "en_name": "Niger", "flag": "🇳🇪"},
+                "NG": {"name": "尼日利亚", "en_name": "Nigeria", "flag": "🇳🇬"},
+                "NU": {"name": "纽埃", "en_name": "Niue", "flag": "🇳🇺"},
+                "NF": {"name": "诺福克岛", "en_name": "Norfolk Island", "flag": "🇳🇫"},
+                "MK": {"name": "北马其顿", "en_name": "North Macedonia", "flag": "🇲🇰"},
+                "MP": {"name": "北马里亚纳群岛", "en_name": "Northern Mariana Islands", "flag": "🇲🇵"},
+                "NO": {"name": "挪威", "en_name": "Norway", "flag": "🇳🇴"},
+                "OM": {"name": "阿曼", "en_name": "Oman", "flag": "🇴🇲"},
+                "PK": {"name": "巴基斯坦", "en_name": "Pakistan", "flag": "🇵🇰"},
+                "PW": {"name": "帕劳", "en_name": "Palau", "flag": "🇵🇼"},
+                "PS": {"name": "巴勒斯坦", "en_name": "Palestine, State of", "flag": "🇵🇸"},
+                "PA": {"name": "巴拿马", "en_name": "Panama", "flag": "🇵🇦"},
+                "PG": {"name": "巴布亚新几内亚", "en_name": "Papua New Guinea", "flag": "🇵🇬"},
+                "PY": {"name": "巴拉圭", "en_name": "Paraguay", "flag": "🇵🇾"},
+                "PE": {"name": "秘鲁", "en_name": "Peru", "flag": "🇵🇪"},
+                "PH": {"name": "菲律宾", "en_name": "Philippines", "flag": "🇵🇭"},
+                "PN": {"name": "皮特凯恩", "en_name": "Pitcairn", "flag": "🇵🇳"},
+                "PL": {"name": "波兰", "en_name": "Poland", "flag": "🇵🇱"},
+                "PT": {"name": "葡萄牙", "en_name": "Portugal", "flag": "🇵🇹"},
+                "PR": {"name": "波多黎各", "en_name": "Puerto Rico", "flag": "🇵🇷"},
+                "QA": {"name": "卡塔尔", "en_name": "Qatar", "flag": "🇶🇦"},
+                "RE": {"name": "留尼汪", "en_name": "Réunion", "flag": "🇷🇪"},
+                "RO": {"name": "罗马尼亚", "en_name": "Romania", "flag": "🇷🇴"},
+                "RU": {"name": "俄罗斯", "en_name": "Russian Federation", "flag": "🇷🇺"},
+                "RW": {"name": "卢旺达", "en_name": "Rwanda", "flag": "🇷🇼"},
+                "BL": {"name": "圣巴泰勒米", "en_name": "Saint Barthélemy", "flag": "🇧🇱"},
+                "SH": {"name": "圣赫勒拿、阿森松和特里斯坦-达库尼亚", "en_name": "Saint Helena, Ascension and Tristan da Cunha", "flag": "🇸🇭"},
+                "KN": {"name": "圣基茨和尼维斯", "en_name": "Saint Kitts and Nevis", "flag": "🇰🇳"},
+                "LC": {"name": "圣卢西亚", "en_name": "Saint Lucia", "flag": "🇱🇨"},
+                "MF": {"name": "法属圣马丁", "en_name": "Saint Martin (French part)", "flag": "🇲🇫"},
+                "PM": {"name": "圣皮埃尔和密克隆", "en_name": "Saint Pierre and Miquelon", "flag": "🇵🇲"},
+                "VC": {"name": "圣文森特和格林纳丁斯", "en_name": "Saint Vincent and the Grenadines", "flag": "🇻🇨"},
+                "WS": {"name": "萨摩亚", "en_name": "Samoa", "flag": "🇼🇸"},
+                "SM": {"name": "圣马力诺", "en_name": "San Marino", "flag": "🇸🇲"},
+                "ST": {"name": "圣多美和普林西比", "en_name": "Sao Tome and Principe", "flag": "🇸🇹"},
+                "SA": {"name": "沙特阿拉伯", "en_name": "Saudi Arabia", "flag": "🇸🇦"},
+                "SN": {"name": "塞内加尔", "en_name": "Senegal", "flag": "🇸🇳"},
+                "RS": {"name": "塞尔维亚", "en_name": "Serbia", "flag": "🇷🇸"},
+                "SC": {"name": "塞舌尔", "en_name": "Seychelles", "flag": "🇸🇨"},
+                "SL": {"name": "塞拉利昂", "en_name": "Sierra Leone", "flag": "🇸🇱"},
+                "SG": {"name": "新加坡", "en_name": "Singapore", "flag": "🇸🇬"},
+                "SX": {"name": "荷属圣马丁", "en_name": "Sint Maarten (Dutch part)", "flag": "🇸🇽"},
+                "SK": {"name": "斯洛伐克", "en_name": "Slovakia", "flag": "🇸🇰"},
+                "SI": {"name": "斯洛文尼亚", "en_name": "Slovenia", "flag": "🇸🇮"},
+                "SB": {"name": "所罗门群岛", "en_name": "Solomon Islands", "flag": "🇸🇧"},
+                "SO": {"name": "索马里", "en_name": "Somalia", "flag": "🇸🇴"},
+                "ZA": {"name": "南非", "en_name": "South Africa", "flag": "🇿🇦"},
+                "GS": {"name": "南乔治亚和南桑威奇群岛", "en_name": "South Georgia and the South Sandwich Islands", "flag": "🇬🇸"},
+                "SS": {"name": "南苏丹", "en_name": "South Sudan", "flag": "🇸🇸"},
+                "ES": {"name": "西班牙", "en_name": "Spain", "flag": "🇪🇸"},
+                "LK": {"name": "斯里兰卡", "en_name": "Sri Lanka", "flag": "🇱🇰"},
+                "SD": {"name": "苏丹", "en_name": "Sudan", "flag": "🇸🇩"},
+                "SR": {"name": "苏里南", "en_name": "Suriname", "flag": "🇸🇷"},
+                "SJ": {"name": "斯瓦尔巴和扬马延", "en_name": "Svalbard and Jan Mayen", "flag": "🇸🇯"},
+                "SE": {"name": "瑞典", "en_name": "Sweden", "flag": "🇸🇪"},
+                "CH": {"name": "瑞士", "en_name": "Switzerland", "flag": "🇨🇭"},
+                "SY": {"name": "叙利亚", "en_name": "Syrian Arab Republic", "flag": "🇸🇾"},
+                "TJ": {"name": "塔吉克斯坦", "en_name": "Tajikistan", "flag": "🇹🇯"},
+                "TZ": {"name": "坦桑尼亚", "en_name": "Tanzania, United Republic of", "flag": "🇹🇿"},
+                "TH": {"name": "泰国", "en_name": "Thailand", "flag": "🇹🇭"},
+                "TL": {"name": "东帝汶", "en_name": "Timor-Leste", "flag": "🇹🇱"},
+                "TG": {"name": "多哥", "en_name": "Togo", "flag": "🇹🇬"},
+                "TK": {"name": "托克劳", "en_name": "Tokelau", "flag": "🇹🇰"},
+                "TO": {"name": "汤加", "en_name": "Tonga", "flag": "🇹🇴"},
+                "TT": {"name": "特立尼达和多巴哥", "en_name": "Trinidad and Tobago", "flag": "🇹🇹"},
+                "TN": {"name": "突尼斯", "en_name": "Tunisia", "flag": "🇹🇳"},
+                "TR": {"name": "土耳其", "en_name": "Turkey", "flag": "🇹🇷"},
+                "TM": {"name": "土库曼斯坦", "en_name": "Turkmenistan", "flag": "🇹🇲"},
+                "TC": {"name": "特克斯和凯科斯群岛", "en_name": "Turks and Caicos Islands", "flag": "🇹🇨"},
+                "TV": {"name": "图瓦卢", "en_name": "Tuvalu", "flag": "🇹🇻"},
+                "UG": {"name": "乌干达", "en_name": "Uganda", "flag": "🇺🇬"},
+                "UA": {"name": "乌克兰", "en_name": "Ukraine", "flag": "🇺🇦"},
+                "AE": {"name": "阿联酋", "en_name": "United Arab Emirates", "flag": "🇦🇪"},
+                "GB": {"name": "英国", "en_name": "United Kingdom of Great Britain and Northern Ireland", "flag": "🇬🇧"},
+                "US": {"name": "美国", "en_name": "United States of America", "flag": "🇺🇸"},
+                "UM": {"name": "美国本土外小岛屿", "en_name": "United States Minor Outlying Islands", "flag": "🇺🇲"},
+                "UY": {"name": "乌拉圭", "en_name": "Uruguay", "flag": "🇺🇾"},
+                "UZ": {"name": "乌兹别克斯坦", "en_name": "Uzbekistan", "flag": "🇺🇿"},
+                "VU": {"name": "瓦努阿图", "en_name": "Vanuatu", "flag": "🇻🇺"},
+                "VE": {"name": "委内瑞拉", "en_name": "Venezuela (Bolivarian Republic of)", "flag": "🇻🇪"},
+                "VN": {"name": "越南", "en_name": "Viet Nam", "flag": "🇻🇳"},
+                "VG": {"name": "英属维尔京群岛", "en_name": "Virgin Islands (British)", "flag": "🇻🇬"},
+                "VI": {"name": "美属维尔京群岛", "en_name": "Virgin Islands (U.S.)", "flag": "🇻🇮"},
+                "WF": {"name": "瓦利斯和富图纳", "en_name": "Wallis and Futuna", "flag": "🇼🇫"},
+                "EH": {"name": "西撒哈拉", "en_name": "Western Sahara", "flag": "🇪🇭"},
+                "YE": {"name": "也门", "en_name": "Yemen", "flag": "🇾🇪"},
+                "ZM": {"name": "赞比亚", "en_name": "Zambia", "flag": "🇿🇲"},
+                "ZW": {"name": "津巴布韦", "en_name": "Zimbabwe", "flag": "🇿🇼"},
+            }
+
+            const allEventListeners = [
+                baseNameInput, suffixStartInput, nameFormatInput, inputNodesTextarea, flagSourceSelect
+            ];
+            allEventListeners.forEach(el => el.addEventListener('input', updateRealtimeViews));
+            processBtn.addEventListener('click', processNodes);
+            copyBtn.addEventListener('click', copyOutput);
+            clearBtn.addEventListener('click', clearInputs);
+            presetFormatsSelect.addEventListener('change', (e) => {
+                nameFormatInput.value = e.target.value;
+                updateRealtimeViews();
+            });
+
+            tabs.forEach(tab => tab.addEventListener('click', () => {
+                const target = tab.getAttribute('data-tab');
+                tabs.forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                tabPanes.forEach(pane => {
+                    pane.classList.remove('active');
+                    if (pane.id === `tab-${target}`) {
+                        pane.classList.add('active');
+                    }
+                });
+            }));
+
+            function updateRealtimeViews() {
+                updatePreview();
+                const { comparisonData } = getRenamingPreviewData();
+                renderComparison(comparisonData);
+                analyzeNodes();
+            }
+
+            function getCountryFlag(textToSearch) {
+                if (!textToSearch) return '';
+                const textUpper = textToSearch.toUpperCase();
+
+                let bestMatchKeyword = '';
+                let bestMatchFlag = '';
+
+                for (const code in COUNTRY) {
+                    const country = COUNTRY[code];
+                    const keywords = [country.name, country.en_name];
+                    for (const keyword of keywords) {
+                        if (keyword && textUpper.includes(keyword.toUpperCase())) {
+                            if (keyword.length > bestMatchKeyword.length) {
+                                bestMatchKeyword = keyword;
+                                bestMatchFlag = country.flag;
+                            }
+                        }
+                    }
+                }
+
+                if (bestMatchFlag) {
+                    return bestMatchFlag;
+                }
+
+                const codeMatches = textUpper.match(/\b([A-Z]{2})\b/g) || [];
+                for (const code of codeMatches) {
+                    if (COUNTRY[code]) {
+                        return COUNTRY[code].flag;
+                    }
+                }
+
+                return '';
+            }
+
+            function updatePreview() {
+                const format = nameFormatInput.value;
+                const baseName = baseNameInput.value.trim() || 'YoungYannick';
+                const startIndex = parseInt(suffixStartInput.value, 10) || 1;
+                const suffix = String(startIndex).padStart(2, '0');
+
+                let previewName = format
+                    .replace('{baseName}', baseName)
+                    .replace('{protocol}', '协议')
+                    .replace('{flag}', '🇺🇳')
+                    .replace('{suffix}', suffix)
+                    .replace('{originalName}', '原始名称');
+
+                previewName = previewName.replace(/\s{2,}/g, ' ').trim();
+
+                if (!previewName.trim()) {
+                    previewName = '未配置规则, 将使用默认名 (例: Node-01)';
+                }
+                namePreview.textContent = previewName;
+            }
+
+            function getRenamingPreviewData() {
+                const baseName = baseNameInput.value.trim();
+                const format = nameFormatInput.value;
+                const flagSource = flagSourceSelect.value;
+                const startIndex = parseInt(suffixStartInput.value, 10) || 1;
+                const nodes = inputNodesTextarea.value.split('\n').map(n => n.trim()).filter(n => n);
+
+                const comparisonData = [];
+                const renamedNodes = [];
+
+                if (nodes.length === 0) return { comparisonData, renamedNodes };
+
+                const paddingWidth = String(nodes.length + startIndex - 1).length > 1 ? String(nodes.length + startIndex - 1).length : 2;
+
+                nodes.forEach((node, index) => {
+                    const protocols = ['ss://', 'vmess://', 'vless://', 'trojan://', 'hysteria2://', 'tuic://', 'socks://', 'anytls://'];
+                    let protocolUri = protocols.find(p => node.toLowerCase().startsWith(p));
+                    let originalName = '无名称';
+                    let protocolName = '未知';
+
+                    if (!protocolUri) {
+                        renamedNodes.push(node);
+                        comparisonData.push({ protocol: '未知', oldName: '无法解析的节点', newName: '保持不变' });
+                        return;
+                    }
+
+                    protocolName = protocolUri.replace('://', '').toUpperCase();
+
+                    try {
+                        if (protocolUri === 'vmess://') {
+                            let b64Data = node.replace('vmess://', '').split('#')[0];
+                            const cleanedB64Data = b64Data.replace(/\s/g, '');
+                            let standardB64 = cleanedB64Data.replace(/-/g, '+').replace(/_/g, '/');
+                            standardB64 += '=='.slice(0, (4 - standardB64.length % 4) % 4);
+                            const decodedStr = new TextDecoder().decode(Uint8Array.from(atob(standardB64), c => c.charCodeAt(0)));
+                            const config = JSON.parse(decodedStr);
+                            if (config.ps) originalName = config.ps;
+                        } else {
+                            const urlParts = node.split('#');
+                            if (urlParts.length > 1 && urlParts[1]) originalName = decodeURIComponent(urlParts[1]);
+                        }
+                    } catch (e) { originalName = '解析失败'; }
+
+                    const textForFlagDetection = flagSource === 'baseName' ? baseName : originalName;
+                    const flag = getCountryFlag(textForFlagDetection);
+                    const suffix = String(startIndex + index).padStart(paddingWidth, '0');
+
+                    let finalName = format
+                        .replace('{baseName}', baseName)
+                        .replace('{protocol}', protocolName)
+                        .replace('{flag}', flag)
+                        .replace('{suffix}', suffix)
+                        .replace('{originalName}', originalName);
+
+                    finalName = finalName.replace(/{[a-zA-Z]+}/g, '').replace(/\s*-\s*-\s*/g, ' - ').replace(/(\s-)$|^(-\s)/, '').replace(/\s{2,}/g, ' ').trim();
+                    if (!finalName) finalName = `Node-${suffix}`;
+
+                    let newUrl = '';
+                    if (protocolUri === 'vmess://') newUrl = renameVmess(node, finalName);
+                    else newUrl = renameSimpleProtocol(node, finalName);
+
+                    renamedNodes.push(newUrl);
+                    comparisonData.push({ protocol: protocolName, oldName: originalName, newName: finalName });
+                });
+
+                return { comparisonData, renamedNodes };
+            }
+
+            function processNodes() {
+                const { renamedNodes, comparisonData } = getRenamingPreviewData();
+                if (comparisonData.length === 0) {
+                    showNotification('输入内容为空！');
+                    return;
+                }
+                outputNodesTextarea.value = renamedNodes.join('\n');
+                renderComparison(comparisonData);
+                showNotification('节点重命名完成！');
+                document.querySelector('.tab-item[data-tab="output"]').click();
+            }
+
+            function analyzeNodes() {
+                const nodes = inputNodesTextarea.value.split('\n').map(n => n.trim()).filter(n => n);
+                const protocolCounts = {};
+                const protocols = ['ss://', 'vmess://', 'vless://', 'trojan://', 'hysteria2://', 'tuic://', 'socks://', 'anytls://'];
+                nodes.forEach(node => {
+                    let protocolName = '未知';
+                    const detectedProtocol = protocols.find(p => node.toLowerCase().startsWith(p));
+                    if (detectedProtocol) protocolName = detectedProtocol.replace('://', '').toUpperCase();
+                    protocolCounts[protocolName] = (protocolCounts[protocolName] || 0) + 1;
+                });
+                renderAnalysisReport(nodes.length, protocolCounts);
+            }
+
+            function renderAnalysisReport(total, protocols) {
+                if (total === 0) {
+                    analysisResult.innerHTML = ``;
+                    return;
+                }
+                const sortedProtocols = Object.entries(protocols).sort((a, b) => b[1] - a[1]);
+                let html = `
+                    <h4>整体概览</h4>
+                    <ul>
+                        <li><span class="name">总节点数</span> <span class="count">${total}</span></li>
+                        <li><span class="name">总协议数</span> <span class="count">${sortedProtocols.length}</span></li>
+                    </ul>
+                    <h4>协议分布</h4>
+                    <ul>${sortedProtocols.map(([name, count]) => `<li><span class="name">${name}</span> <span class="count">${count}</span></li>`).join('')}</ul>`;
+                analysisResult.innerHTML = html;
+            }
+
+            function renderComparison(data) {
+                if (!data || data.length === 0) {
+                    comparisonList.innerHTML = ``;
+                    return;
+                }
+                const arrowSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M7.21 14.77a.75.75 0 0 1 .02-1.06L11.168 10 7.23 6.29a.75.75 0 1 1 1.04-1.08l4.5 4.25a.75.75 0 0 1 0 1.08l-4.5 4.25a.75.75 0 0 1-1.06-.02Z" clip-rule="evenodd" /></svg>`;
+                const fragment = document.createDocumentFragment();
+                data.forEach(item => {
+                    let protocolClass = `protocol-tag--${item.protocol.toLowerCase()}`;
+                    const itemEl = document.createElement('div');
+                    itemEl.className = 'comparison-item';
+                    itemEl.innerHTML = `
+                        <div><span class="protocol-tag ${protocolClass}">${item.protocol}</span></div>
+                        <span class="comparison-name original">${item.oldName}</span>
+                        <div class="comparison-arrow">${arrowSvg}</div>
+                        <span class="comparison-name renamed">${item.newName}</span>`;
+                    fragment.appendChild(itemEl);
+                });
+                comparisonList.innerHTML = '';
+                comparisonList.appendChild(fragment);
+            }
+
+            function clearInputs() {
+                inputNodesTextarea.value = '';
+                outputNodesTextarea.value = '';
+                suffixStartInput.value = '1';
+                showNotification('输入区已清空');
+                updateRealtimeViews();
+            }
+
+            function showNotification(message, duration = 2000) {
+                notificationText.textContent = message;
+                notification.classList.add('show');
+                setTimeout(() => { notification.classList.remove('show'); }, duration);
+            }
+
+            function copyOutput() {
+                const textToCopy = outputNodesTextarea.value;
+                if (!textToCopy) {
+                    showNotification('输出内容为空！');
+                    return;
+                }
+                if (navigator.clipboard && window.isSecureContext) {
+                    navigator.clipboard.writeText(textToCopy).then(() => {
+                        showNotification('已成功复制到剪贴板！');
+                    }).catch(err => { fallbackCopy(textToCopy); });
+                } else {
+                    fallbackCopy(textToCopy);
+                }
+            }
+
+            function fallbackCopy(text) {
+                const textArea = document.createElement("textarea");
+                textArea.value = text;
+                textArea.style.position = "fixed";
+                textArea.style.top = "-9999px";
+                textArea.style.left = "-9999px";
+                document.body.appendChild(textArea);
+                textArea.focus();
+                textArea.select();
+                try {
+                    if (document.execCommand('copy')) showNotification('已通过备用方式复制！');
+                    else showNotification('复制失败！');
+                } catch (err) { showNotification('复制失败！'); }
+                document.body.removeChild(textArea);
+            }
+
+            function renameSimpleProtocol(node, newName) {
+                try {
+                    const encodedName = encodeURIComponent(newName);
+                    const baseUrl = node.split('#')[0];
+                    return `${baseUrl}#${encodedName}`;
+                } catch (e) { return node; }
+            }
+
+            function renameVmess(node, newName) {
+                try {
+                    let b64Data = node.replace('vmess://', '').split('#')[0];
+                    const cleanedB64Data = b64Data.replace(/\s/g, '');
+                    let standardB64 = cleanedB64Data.replace(/-/g, '+').replace(/_/g, '/');
+                    standardB64 += '=='.slice(0, (4 - standardB64.length % 4) % 4);
+                    const decodedStr = new TextDecoder().decode(Uint8Array.from(atob(standardB64), c => c.charCodeAt(0)));
+                    const config = JSON.parse(decodedStr);
+                    config.ps = newName;
+                    const modifiedJsonStr = JSON.stringify(config);
+                    const modifiedB64 = btoa(unescape(encodeURIComponent(modifiedJsonStr)));
+                    return `vmess://${modifiedB64}`;
+                } catch (e) { return node; }
+            }
+
+            updateRealtimeViews();
+        });
+    </script>
+</body>
+
+</html>
