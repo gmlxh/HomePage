@@ -1,17 +1,17 @@
 [
   {
-    "name": "Komari 工具",
-    "url": "https://yancy.dpdns.org/",
+    "name": "探针工具",
+    "url": "https://nezha,lianghuigu,com/",
     "icon": "fas fa-search"
   },
   {
     "name": "订阅转换",
-    "url": "https://zynt.top/",
+    "url": "https://sub.lianghuigu.top/",
     "icon": "fas fa-sync-alt"
   },
   {
-    "name": "节点重命名",
-    "url": "/rname",
+    "name": "博客",
+    "url": "https://boke.lianghuigu.top",
     "icon": "fas fa-file-signature"
   },{
     "name": "IPLark",
