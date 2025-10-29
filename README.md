@@ -9,7 +9,7 @@
 
 - 修改联系方式 **`src/config/links.json`** 文件中的内容值即可
 - 修改网站列表 **`src/config/site.json`** 文件中的内容值即可
-
+- 修改网站名称 **`.env`** 文件中的内容即可
 ### 部署
 
 * **安装** [node.js](https://nodejs.org/zh-cn/) **环境**
@@ -32,3 +32,4 @@ npm run dev
 # 构建
 npm run build
 ```
+构建完成后，静态资源会在 dist 目录 中生成，可将 dist 文件夹下的文件上传至服务器，也可使用 Vercel 等托管平台一键导入并自动部署
