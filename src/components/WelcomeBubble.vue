@@ -21,15 +21,15 @@
           <span></span>
           <span class="data-text">{{ browser }}</span>
         </div>
-        <div id="ip" class="data-item" v-if="ip">
+        <div id="ip" class="data-item" v-if="ip" @click="toggleIpVisibility">
           <i class="fas fa-globe"></i>
           <span></span>
-          <span class="data-text">{{ ip }}</span>
+          <span class="data-text" :class="{ 'spoiler': ipHidden }">{{ ip }}</span>
         </div>
-        <div id="isp" class="data-item" v-if="isp">
+        <div id="isp" class="data-item" v-if="isp" @click="toggleIspVisibility">
           <i class="fas fa-server"></i>
           <span></span>
-          <span class="data-text">{{ isp }}</span>
+          <span class="data-text" :class="{ 'spoiler': ispHidden }">{{ isp }}</span>
         </div>
         <div id="date" class="data-item">
           <i class="fas fa-calendar-alt"></i>
@@ -51,6 +51,16 @@ const isp = ref('');
 const browser = ref('');
 const date = ref('');
 const os = ref('');
+const ipHidden = ref(false);
+const ispHidden = ref(false);
+
+const toggleIpVisibility = () => {
+  ipHidden.value = !ipHidden.value;
+};
+
+const toggleIspVisibility = () => {
+  ispHidden.value = !ispHidden.value;
+};
 
 const osIcon = computed(() => {
   const system = os.value.toLowerCase();
@@ -192,6 +202,20 @@ onMounted(async () => {
   .data-text {
     font-weight: bold;
     color: var(--primary-color);
+  }
+}
+
+.spoiler {
+  background: var(--primary-color);
+  color: transparent !important;
+  user-select: none;
+  cursor: pointer;
+  border-radius: 4px;
+  padding: 2px 6px;
+  transition: all 0.3s ease;
+
+  &:hover {
+    opacity: 0.8;
   }
 }
 
