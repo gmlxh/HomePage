@@ -1,10 +1,5 @@
 [
   {
-    "name": "Komari 探针",
-    "url": "https://youngyannick.cn/",
-    "icon": "fas fa-server"
-  },
-  {
     "name": "Komari 工具",
     "url": "https://yancy.dpdns.org/",
     "icon": "fas fa-search"

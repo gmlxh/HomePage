@@ -4,17 +4,10 @@
     "icon": "fab fa-github",
     "url": "https://github.com/YoungYannick",
     "hoverColor": "#6500fc"
-  },
-  {
-    "type": "BiliBili",
-    "icon": "fab fa-bilibili",
-    "url": "https://space.bilibili.com/505709474",
-    "hoverColor": "#fb7299"
-  },
-  {
-    "type": "网易云音乐",
-    "icon": "fas fa-music",
-    "url": "https://music.163.com/#/user/home?id=435291570",
-    "hoverColor": "#e10000"
+  },{
+    "type": "赞赏",
+    "icon": "fab fa-weixin",
+    "qrCode": "WX.jpg",
+    "hoverColor": "#07c160"
   }
 ]

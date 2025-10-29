@@ -3,7 +3,8 @@ import Home from '../components/Home.vue';
 
 const routes = [
     {path: '/', name: 'Home', component: Home},
-    {path: '/rname', name: 'Rname',
+    {
+        path: '/rname', name: 'Rname',
         beforeEnter: (to, from, next) => {
             window.location.href = '/rname.html';
         }

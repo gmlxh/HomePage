@@ -262,4 +262,47 @@ const toggleCalendar = () => {
     opacity: 0;
   }
 }
+
+@media screen and (max-width: 768px) {
+  .visit-timer {
+    bottom: 25px;
+    padding: 8px 14px;
+    font-size: 13px;
+
+    .timer-content {
+      gap: 4px;
+      font-size: 0.9em;
+
+      i {
+        font-size: 1em;
+      }
+
+      span {
+        font-size: 1em;
+      }
+    }
+  }
+
+  .time-wrapper {
+    width: 1.5em;
+    height: 1.1em;
+
+    .time-unit {
+      width: 1.5em;
+      height: 1.1em;
+      line-height: 1.1em;
+    }
+  }
+
+  .calendar-popup {
+    bottom: calc(25px + 50px);
+    padding: 12px;
+    font-size: 13px;
+    min-width: 180px;
+
+    .calendar-time {
+      gap: 8px;
+    }
+  }
+}
 </style>

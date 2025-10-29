@@ -3,7 +3,6 @@
     <div class="user-profile-container">
       <div class="user-profile-image" v-motion-pop>
         <img :src="profileImage" alt="头像" @click.stop="toggleInfo">
-        <span class="status-ball"></span>
       </div>
       <div class="user-name" v-motion-slide-left>
         <h1>Hi,</h1>
@@ -142,6 +141,8 @@ const applyTheme = (theme) => {
 
   if (theme === THEME_DARK) {
     isDark = true;
+  } else if (theme === THEME_LIGHT) {
+    isDark = false;
   } else if (theme === THEME_SYSTEM) {
     isDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
   }
@@ -243,56 +244,36 @@ onUnmounted(() => {
   .user-profile-image {
     display: flex;
     border-radius: 50%;
-    box-shadow: 0 2px 8px var(--shadow-color);
-    padding: 5px;
-    border: 3px solid var(--border-color);
     position: relative;
 
     img {
-      width: 150px;
-      height: 150px;
-      border-radius: 50%;
-      background-size: cover;
-      background-position: center;
-
-      &:hover {
-        cursor: pointer;
-      }
+      --s: 230px;
+      --b: 4px;
+      --f: 1;
+      box-sizing: content-box;
+      transform: scale(var(--f));
+      width: var(--s);
+      height: var(--s);
+      cursor: pointer;
+      transition: 0.4s;
+      background: radial-gradient(
+          circle closest-side,
+          var(--background-color) calc(99% - var(--b) / var(--f)),
+          var(--avatar-border-color) calc(100% - var(--b) / var(--f)) 99%,
+          transparent
+      ) content-box no-repeat center / calc(100% / var(--f));
+      border-radius: 0 0 999px 999px;
+      padding-top: calc(var(--s) / 5);
+      mask:
+          linear-gradient(#000 0 0) no-repeat 50%
+          calc(10px - (1 / var(--f) - 1) * var(--s) / 2 - var(--b)) /
+          calc(100% / var(--f) - 3 * var(--b)) 50%,
+          radial-gradient(circle closest-side, #000 99%, transparent)
+          content-box no-repeat center / calc(100% / var(--f));
     }
 
-    .status-ball {
-      position: absolute;
-      background: #00c800;
-      width: 2em;
-      height: 2em;
-      border-radius: 20px;
-      border: 3px solid #eee;
-      bottom: 5px;
-      right: 15px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      transition: all 0.3s ease;
-      z-index: 1;
-      cursor: pointer;
-      overflow: hidden;
-
-      &::before {
-        content: "在线中";
-        color: #00c800;
-        opacity: 0;
-        transition: opacity 0.3s ease-in-out, color 0.1s ease-in-out;
-      }
-
-      &:hover {
-        width: 4.5em;
-        height: 2em;
-      }
-
-      &:hover::before {
-        opacity: 1;
-        color: #eee;
-      }
+    img:hover {
+      --f: 1.25;
     }
   }
 
@@ -465,7 +446,6 @@ onUnmounted(() => {
     z-index: 1000;
   }
 
-  /* 下拉菜单动画 */
   .fade-down-enter-active,
   .fade-down-leave-active {
     transition: all 0.2s ease-out;
@@ -530,8 +510,17 @@ onUnmounted(() => {
     gap: 0;
   }
 
+  .description {
+    font-size: 0.9rem !important;
+  }
+
+  .user-profile-image img {
+    --s: 140px !important;
+    --b: 2px !important;
+  }
+
   h1 {
-    font-size: 1.5em;
+    font-size: 1.4em !important;
   }
 }
 </style>
