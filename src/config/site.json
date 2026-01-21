@@ -20,14 +20,26 @@
     "icon": "fas fa-globe"
   },
   {
+    "name":"自建图床",
+    "url":"https://lsky.lianghuigu.com",
+    "icon":"fas fa-image"
+  },
+  {
+    "name":"WebSSH",
+    "url":"https://ssh.wallstreetwolf.dpdns.org",
+    "icon":"fas fa-network-wired"
+  },
+  {
     "name": "IPLark",
     "url": "https://iplark.com/",
     "icon": "fas fa-globe"
-  },{
+  },
+  {
     "name": "PingIP",
     "url": "https://pingip.cn/",
     "icon": "fas fa-globe"
-  }, {
+  },
+  {
     "name": "IP.SB",
     "url": "https://ip.sb/",
     "icon": "fas fa-globe"
@@ -36,11 +48,13 @@
     "name": "Fast 测网速",
     "url": "https://fast.com/",
     "icon": "fas fa-tachometer-alt"
-  },{
+  },
+  {
     "name": "Speedtest",
     "url": "https://speedtest.net/",
     "icon": "fas fa-tachometer-alt"
-  },{
+  },
+  {
     "name": "CloudFlare Speed Test",
     "url": "https://speed.cloudflare.com/",
     "icon": "fas fa-cloud"
